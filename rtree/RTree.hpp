@@ -141,44 +141,21 @@ protected:
   }
 
   // search for appropriate node in target_level to insert bound
-  node_type* choose_insert_target(geometry_type const& bound, int target_level)
-  {
+  node_type* choose_insert_target(geometry_type const& bound, int target_level) {
     assert(target_level <= _leaf_level);
-    /*
-    CLl. [Initialize.]
-    Set N to be the root node.
-
-    CL2. [Leaf check.]
-    If N is a leaf, return N.
-
-    CL3. [Choose subtree.]
-    If N is not a leaf, let F be the entry in N whose rectangle F.I needs least
-    enlargement to include E.I. Resolve ties by choosing the entry with the
-    rectangle of smallest area.
-
-    CL4. [Descend until a leaf is reached.]
-    Set N to be the child node pointed to by F.p and repeat from CL2.
-    */
-
     node_type* n = _root->as_node();
-    for (int level = 0; level < target_level; ++level)
-    {
+    for (int level = 0; level < target_level; ++level) {
       area_type min_area_enlarge = MAX_AREA;
       typename node_type::iterator chosen = n->end();
-
-      for (auto ci = n->begin(); ci != n->end(); ++ci)
-      {
+      for (auto ci = n->begin(); ci != n->end(); ++ci) {
         const auto area_enlarge = traits::area(traits::merge(ci->first, bound))
-                                  - traits::area(ci->first);
-        if (area_enlarge < min_area_enlarge)
-        {
+                                - traits::area(ci->first);
+        if (area_enlarge < min_area_enlarge) {
           min_area_enlarge = area_enlarge;
           chosen = ci;
         }
-        else if (area_enlarge == min_area_enlarge)
-        {
-          if (traits::area(ci->first) < traits::area(chosen->first))
-          {
+        else if (area_enlarge == min_area_enlarge) {
+          if (traits::area(ci->first) < traits::area(chosen->first)) {
             chosen = ci;
           }
         }
@@ -214,20 +191,8 @@ protected:
                    bool reinsert)
   {
     NodeType* pair = nullptr;
-    if (parent->size() == MAX_ENTRIES)
-    {
-      // overflow treatment
-      if (reinsert && parent->as_node() != root()
-          && parent->parent()->size() > 1
-          && MAX_ENTRIES + 1 - _reinsert_nodes >= MIN_ENTRIES
-          && MAX_ENTRIES + 1 - _reinsert_nodes <= MAX_ENTRIES)
-      {
-        this->reinsert(parent, std::move(new_child));
-      }
-      else
-      {
-        pair = split(parent, std::move(new_child));
-      }
+    if (parent->size() == MAX_ENTRIES) {
+      pair = split(parent, std::move(new_child));
     }
     else
     {
@@ -270,8 +235,7 @@ protected:
   // split into two nodes
   // so that two nodes' child count is in range [ MIN_ENTRIES, MAX_ENTRIES ]
   template <typename NodeType>
-  NodeType* split(NodeType* node, typename NodeType::value_type child)
-  {
+  NodeType* split(NodeType* node, typename NodeType::value_type child) {
     NodeType* pair = construct_node<NodeType>();
     // @TODO another split scheme
     splitter_t spliter;
@@ -372,6 +336,7 @@ protected:
 
 public:
   // set the number of reinserted nodes
+  //@todo miau
   void reinsert_nodes(size_type count)
   {
     // max >= max+1-count >= min
