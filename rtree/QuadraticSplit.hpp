@@ -22,6 +22,12 @@ struct quadratic_split_t {
   constexpr static unsigned int MIN_ENTRIES = TreeType::MIN_ENTRIES;
   constexpr static unsigned int MAX_ENTRIES = TreeType::MAX_ENTRIES;
 
+  /**
+   * Pick the first two entries to be the first elements of the groups.
+   * @param node node to split
+   * @param new_child new child entry pair to insert
+   * @param node_pair resulting split node
+   */
   template <typename NodeType>
   void pickSeeds(NodeType* node,
                        typename NodeType::value_type new_child,
@@ -109,47 +115,34 @@ struct quadratic_split_t {
     assert(node->size() == MAX_ENTRIES);
     assert(node_pair);
     assert(node_pair->size() == 0);
+
     pickSeeds(node, std::move(new_child), node_pair);
 
-    typename NodeType::size_type count1 = 1;
+    typename NodeType::size_type selectedGroup1 = 1;
     geometry_type bound1 = node->at(0).first;
     geometry_type bound2 = node_pair->at(0).first;
 
-    while (count1 + node_pair->size() < MAX_ENTRIES + 1)
-    {
-      /*
-      PN1. [Determine cost of putting each entry in each group.]
-      For each entry E not yet in a group,
-      calculate d1 = the area increase required in the covering rectangle of
-      Group 1 to include E.I. Calculate d2  similarly for Group 2.
-
-      PN2. [Find entry with greatest preference for one group.]
-      Choose any entry with the maximum difference between d1 and d2.
-      */
-      const typename NodeType::size_type node_left
-          = MAX_ENTRIES + 1 - (count1 + node_pair->size());
-      if (count1 + node_left == MIN_ENTRIES)
-      {
+    while (selectedGroup1 + node_pair->size() < MAX_ENTRIES + 1) {
+      const typename NodeType::size_type remainingEntries
+          = MAX_ENTRIES + 1 - (selectedGroup1 + node_pair->size());
+      if (selectedGroup1 + remainingEntries == MIN_ENTRIES) {
         break;
       }
-      else if (node_pair->size() + node_left == MIN_ENTRIES)
-      {
-        for (typename NodeType::size_type i = 0; i < node_left; ++i)
-        {
+      else if (node_pair->size() + remainingEntries == MIN_ENTRIES) {
+        for (typename NodeType::size_type i = 0; i < remainingEntries; ++i) {
           auto back_data = std::move(node->back());
           node->pop_back();
           node_pair->insert(std::move(back_data));
         }
         break;
       }
-      else
-      {
+      //////////////// pickNext ///////////////////////
+      else {
         int picked = 0;
         int picked_to = 0;
         area_type maximum_difference = LOWEST_AREA;
 
-        for (typename NodeType::size_type i = count1; i < node->size(); ++i)
-        {
+        for (typename NodeType::size_type i = selectedGroup1; i < node->size(); ++i) {
           const area_type d1
               = traits::area(traits::merge(bound1, node->at(i).first))
                 - traits::area(bound1);
@@ -157,26 +150,31 @@ struct quadratic_split_t {
               = traits::area(traits::merge(bound2, node->at(i).first))
                 - traits::area(bound2);
           const auto diff = std::abs(d1 - d2);
-
-          if (diff > maximum_difference)
-          {
+          if (diff == 0) {
+            picked = i;
+            maximum_difference = diff;
+            if(traits::area(bound1) == traits::area(bound2)) {
+              picked_to = selectedGroup1 < node_pair->size()? 0 : 1;
+            }
+            else {
+              picked_to = traits::area(bound1) < traits::area(bound2) ? 0 : 1;
+            }
+          }
+          if (diff > maximum_difference) {
             picked = i;
             maximum_difference = diff;
             picked_to = d1 < d2 ? 0 : 1;
           }
         }
 
-        if (picked_to == 0)
-        {
+        if (picked_to == 0) {
           bound1 = traits::merge(bound1, node->at(picked).first);
-          if (picked != count1)
-          {
-            node->swap(count1, picked);
+          if (picked != selectedGroup1) {
+            node->swap(selectedGroup1, picked);
           }
-          ++count1;
+          ++selectedGroup1;
         }
-        else
-        {
+        else {
           bound2 = traits::merge(bound2, node->at(picked).first);
           auto picked_data = std::move(node->at(picked));
           node->erase(node->begin() + picked);

@@ -166,19 +166,15 @@ protected:
     return n;
   }
   // adjust bound from node `N` to root recursively
-  void broadcast_new_bound(node_type* N)
-  {
-    while (N->parent())
-    {
+  void broadcast_new_bound(node_type* N) {
+    while (N->parent()) {
       N->entry().first = N->calculate_bound();
       N = N->parent();
     }
   }
   // adjust bound from node `leaf` to root recursively
-  void broadcast_new_bound(leaf_type* leaf)
-  {
-    if (leaf->parent())
-    {
+  void broadcast_new_bound(leaf_type* leaf) {
+    if (leaf->parent()) {
       leaf->entry().first = leaf->calculate_bound();
       broadcast_new_bound(leaf->parent());
     }
@@ -187,34 +183,29 @@ protected:
   // insert child to given parent
   template <typename NodeType>
   void insert_node(NodeType* parent,
-                   typename NodeType::value_type new_child,
-                   bool reinsert)
+                   typename NodeType::value_type new_child)
   {
     NodeType* pair = nullptr;
     if (parent->size() == MAX_ENTRIES) {
       pair = split(parent, std::move(new_child));
     }
-    else
-    {
+    else {
       parent->insert(std::move(new_child));
     }
     broadcast_new_bound(parent);
 
-    // split occured
+    // split occurred
     // insert new node pair to parent
-    if (pair)
-    {
-      if (parent == _root)
-      {
+    if (pair) {
+      if (parent == _root) {
         node_type* new_root = construct_node<node_type>();
         new_root->insert({ parent->calculate_bound(), parent });
         new_root->insert({ pair->calculate_bound(), pair });
         _root = new_root;
         ++_leaf_level;
       }
-      else
-      {
-        insert_node(parent->parent(), { pair->calculate_bound(), pair }, true);
+      else {
+        insert_node(parent->parent(), { pair->calculate_bound(), pair });
       }
     }
   }
@@ -295,7 +286,7 @@ protected:
       auto& c = children[i];
       node_type* chosen = choose_insert_target(
           c.first, leaf_level() - node_realtive_level_from_leaf);
-      insert_node(chosen, std::move(c), false);
+      insert_node(chosen, std::move(c));
     }
   }
   void reinsert(leaf_type* node, typename leaf_type::value_type child)
@@ -330,7 +321,7 @@ protected:
       auto& c = children[i];
       leaf_type* chosen
           = choose_insert_target(c.first, leaf_level())->as_leaf();
-      insert_node(chosen, std::move(c), false);
+      insert_node(chosen, std::move(c));
     }
   }
 
@@ -348,7 +339,7 @@ public:
   {
     leaf_type* chosen
         = choose_insert_target(new_val.first, _leaf_level)->as_leaf();
-    insert_node(chosen, std::move(new_val), true);
+    insert_node(chosen, std::move(new_val));
   }
   template <typename... Args>
   void emplace(Args&&... args)
@@ -356,8 +347,7 @@ public:
     insert(value_type(std::forward<Args>(args)...));
   }
 
-  void erase(iterator pos)
-  {
+  void erase(iterator pos) {
     leaf_type* leaf = pos._leaf;
     leaf->erase(pos._pointer);
 
@@ -436,7 +426,7 @@ public:
         {
           node_type* chosen = choose_insert_target(
               c.first, _leaf_level - reinsert.relative_level_from_leaf);
-          insert_node(chosen, c, true);
+          insert_node(chosen, c);
         }
         destroy_node(reinsert.parent->as_node());
       }

@@ -32,7 +32,7 @@ void insertTest() {
   }
   */
 
-  int N = 3;
+  int N = 100;
 
   rtree_type rtree;
   for (int i = 0; i < N; ++i)
@@ -227,12 +227,12 @@ int main() {
 
   // insert test
   insertTest();
-/*
+
   // delete test
-  deleteTest();
+  //deleteTest();
 
   // assign test
-  assignTest();
-*/
+  //assignTest();
+
   return 0;
 }
