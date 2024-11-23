@@ -192,6 +192,59 @@ void deleteTest() {
   }
 }
 
+void searchTest() {
+  using rtree_type = rtree::RTree<rtree::aabb_t<int>, rtree::aabb_t<int>, int>;
+  using traits = rtree_type::traits;
+  using bound_type = rtree_type::geometry_type;
+  using node_type = rtree_type::node_type;
+  std::mt19937 mt(std::random_device {}());
+  std::uniform_int_distribution<int> dist(-100, 100);
+
+  rtree_type rtree;
+  rtree.reinsert_nodes(3);
+  bound_type search_range = { -10, 10 };
+
+  std::vector<int> inside_list, overlap_list;
+
+  for (int i = 0; i < 1000; ++i)
+  {
+    int min_ = dist(mt);
+    int max_ = dist(mt);
+    if (max_ < min_)
+    {
+      std::swap(min_, max_);
+    }
+    rtree.insert({ { min_, max_ }, i });
+
+    if (traits::is_inside(search_range, bound_type { min_, max_ }))
+    {
+      inside_list.push_back(i);
+    }
+    if (traits::is_overlap(search_range, bound_type { min_, max_ }))
+    {
+      overlap_list.push_back(i);
+    }
+
+    std::vector<int> cur_inside, cur_overlap;
+    rtree.search_inside(search_range,
+                        [&](rtree_type::value_type v)
+                        {
+                          cur_inside.push_back(v.second);
+                          return false;
+                        });
+    std::sort(cur_inside.begin(), cur_inside.end());
+
+    rtree.search_overlap(search_range,
+                         [&](rtree_type::value_type v)
+                         {
+                           cur_overlap.push_back(v.second);
+                           return false;
+                         });
+
+    std::sort(cur_overlap.begin(), cur_overlap.end());
+  }
+}
+
 void assignTest() {
   using rtree_type = rtree::RTree<rtree::aabb_t<int>, int, int>;
   using traits = rtree_type::traits;

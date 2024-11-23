@@ -1,5 +1,18 @@
-C:\Users\msumi\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/Users/msumi/AppData/Local/Programs/CLion/bin/ninja/win/x64/ninja.exe -G Ninja -S D:\MVC\RTree -B D:\MVC\RTree\cmake-build-debug
--- Found SFML 2.5.1 in C:/SFML-2.5.1/lib/cmake/SFML
--- Configuring done (2.3s)
--- Generating done (0.3s)
--- Build files have been written to: D:/MVC/RTree/cmake-build-debug
+C:\Users\heidy\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "MinGW Makefiles" -S C:\Users\heidy\CLionProjects\RTree_cpp -B C:\Users\heidy\CLionProjects\RTree_cpp\cmake-build-debug
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of void*
+-- Check size of void* - done
+-- Found OpenGL: opengl32
+-- Looking for dinput.h
+-- Looking for dinput.h - found
+-- Found OpenAL: C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug/_deps/sfml-src/extlibs/libs-mingw/x64/libopenal32.a
+-- Found VORBIS: C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug/_deps/sfml-src/extlibs/libs-mingw/x64/libvorbisenc.a;C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug/_deps/sfml-src/extlibs/libs-mingw/x64/libvorbisfile.a;C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug/_deps/sfml-src/extlibs/libs-mingw/x64/libvorbis.a;C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug/_deps/sfml-src/extlibs/libs-mingw/x64/libogg.a
+-- Found FLAC: C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug/_deps/sfml-src/extlibs/libs-mingw/x64/libFLAC.a
+-- Configuring done (249.7s)
+-- Generating done (0.5s)
+-- Build files have been written to: C:/Users/heidy/CLionProjects/RTree_cpp/cmake-build-debug

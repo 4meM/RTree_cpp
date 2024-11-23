@@ -351,54 +351,45 @@ public:
     leaf_type* leaf = pos._leaf;
     leaf->erase(pos._pointer);
 
-    if (leaf == _root)
-    {
+    if (leaf == _root) {
       return;
     }
 
     // it's children will be reinserted later
-    struct erase_reinsert_node_info_t
-    {
+    struct erase_reinsert_node_info_t {
       int relative_level_from_leaf;
       node_base_type* parent;
     };
     std::vector<erase_reinsert_node_info_t> reinsert_nodes;
 
     node_type* node = leaf->parent();
-    if (leaf->size() < MIN_ENTRIES)
-    {
+    if (leaf->size() < MIN_ENTRIES) {
       // delete node from node's parent
       node->erase(leaf);
 
       // insert node to set
       reinsert_nodes.push_back({ 0, leaf });
     }
-    else
-    {
+    else {
       leaf->entry().first = leaf->calculate_bound();
     }
-    for (int level = _leaf_level - 1; level > 0; --level)
-    {
+    for (int level = _leaf_level - 1; level > 0; --level) {
       node_type* parent = node->parent();
-      if (node->size() < MIN_ENTRIES)
-      {
+      if (node->size() < MIN_ENTRIES) {
         // delete node from node's parent
         parent->erase(node);
         // insert node to set
         reinsert_nodes.push_back({ _leaf_level - level, node });
       }
-      else
-      {
+      else {
         node->entry().first = node->calculate_bound();
       }
       node = parent;
     }
 
-    // root adjustment
-    if (_leaf_level > 0)
-    {
-      if (_root->as_node()->size() == 1)
-      {
+    // if under-flowing nodes has been propagated until the root
+    if (_leaf_level > 0) {
+      if (_root->as_node()->size() == 1) {
         node_base_type* child = _root->as_node()->at(0).second;
         _root->as_node()->erase(child);
         destroy_node(_root->as_node());
@@ -409,21 +400,16 @@ public:
 
     // reinsert entries
     // sustain the relative level from leaf
-    for (erase_reinsert_node_info_t reinsert : reinsert_nodes)
-    {
+    for (erase_reinsert_node_info_t reinsert : reinsert_nodes) {
       // leaf node
-      if (reinsert.relative_level_from_leaf == 0)
-      {
-        for (auto& c : *(reinsert.parent->as_leaf()))
-        {
+      if (reinsert.relative_level_from_leaf == 0) {
+        for (auto& c : *(reinsert.parent->as_leaf())) {
           insert(std::move(c));
         }
         destroy_node(reinsert.parent->as_leaf());
       }
-      else
-      {
-        for (auto& c : *(reinsert.parent->as_node()))
-        {
+      else {
+        for (auto& c : *(reinsert.parent->as_node())) {
           node_type* chosen = choose_insert_target(
               c.first, _leaf_level - reinsert.relative_level_from_leaf);
           insert_node(chosen, c);
