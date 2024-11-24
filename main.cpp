@@ -9,6 +9,7 @@
 
 #include "rtree/RTree.hpp"
 #include "rtree/AABB.hpp"
+#include "InteractiveRtree.hpp"
 
 using namespace std;
 
@@ -193,7 +194,7 @@ void deleteTest() {
 }
 
 void searchTest() {
-  using rtree_type = rtree::RTree<rtree::aabb_t<int>, rtree::aabb_t<int>, int>;
+  using rtree_type = rtree::RTree<rtree::aabb_t<int>, int, int>;
   using traits = rtree_type::traits;
   using bound_type = rtree_type::geometry_type;
   using node_type = rtree_type::node_type;
@@ -214,13 +215,13 @@ void searchTest() {
     {
       std::swap(min_, max_);
     }
-    rtree.insert({ { min_, max_ }, i });
+    rtree.insert({ min_, i });
 
-    if (traits::is_inside(search_range, bound_type { min_, max_ }))
+    if (traits::is_inside(search_range, min_))
     {
       inside_list.push_back(i);
     }
-    if (traits::is_overlap(search_range, bound_type { min_, max_ }))
+    if (traits::is_overlap(search_range, min_ ))
     {
       overlap_list.push_back(i);
     }
@@ -242,50 +243,22 @@ void searchTest() {
                          });
 
     std::sort(cur_overlap.begin(), cur_overlap.end());
+    //print cur_overlap and overlap_list elements
+    for (int i = 0; i < cur_overlap.size(); i++) {
+      cout << cur_overlap[i] << " " << overlap_list[i] << endl;
+    }
   }
-}
-
-void assignTest() {
-  using rtree_type = rtree::RTree<rtree::aabb_t<int>, int, int>;
-  using traits = rtree_type::traits;
-  using bound_type = rtree_type::geometry_type;
-  using node_type = rtree_type::node_type;
-  std::mt19937 mt(std::random_device {}());
-  std::uniform_int_distribution<int> dist(-100, 100);
-
-  rtree_type rtree;
-  rtree.reinsert_nodes(3);
-  std::vector<rtree_type::value_type> original;
-
-  for (int i = 0; i < 1000; ++i)
-  {
-    int pos = dist(mt);
-    rtree.insert({ pos, i });
-    original.push_back({ pos, i });
-  }
-  std::sort(original.begin(), original.end());
-
-  rtree_type rtree_copy = rtree;
-  std::vector<rtree_type::value_type> copied(rtree_copy.begin(),
-                                             rtree_copy.end());
-  std::sort(copied.begin(), copied.end());
-
-  rtree_type rtree_moved = std::move(rtree);
-  std::vector<rtree_type::value_type> moved(rtree_moved.begin(),
-                                            rtree_moved.end());
-  std::sort(moved.begin(), moved.end());
 }
 
 int main() {
-
+  InteractiveRtree interactiveRtree;
+  interactiveRtree.run();
   // insert test
-  insertTest();
+  //insertTest();
+
+  //searchTest();
 
   // delete test
   //deleteTest();
-
-  // assign test
-  //assignTest();
-
   return 0;
 }

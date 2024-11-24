@@ -23,7 +23,9 @@ add_executable(RTree main.cpp
         rtree/StaticVector.hpp
         rtree/RStarSplit.hpp
         rtree/QuadraticSplit.hpp
-        rtree/RTree.hpp)
+        rtree/RTree.hpp
+        InteractiveRtree.cpp
+        InteractiveRtree.hpp)
 
 target_link_libraries(RTree PRIVATE sfml-graphics)
 target_compile_features(RTree PRIVATE cxx_std_17)
