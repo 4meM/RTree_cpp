@@ -7,12 +7,12 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
+#include <sstream>
 #include "GeometryTraits.hpp"
 #include "Global.hpp"
 #include "Iterator.hpp"
 #include "StaticNode.hpp"
-
+#include <fstream>
 #include "QuadraticSplit.hpp"
 #include "RStarSplit.hpp"
 
@@ -89,10 +89,47 @@ public:
     return traits::is_inside(target, query);
   }
 
+  void generate_dot(const std::string& filename) const {
+    std::ofstream file(filename);
+    file << "digraph RTree {\n";
+    file << "  node [shape=record];\n";
+    int id = 0;
+    generateGraphVizNode(file, root()->as_node(), 0, id);
+    file << "}\n";
+    file.close();
+  }
+
 protected:
   node_base_type* _root = nullptr;
   int _leaf_level = 0;
+  void generateGraphVizNode(std::ofstream& file, const node_type* node, int level, int& id) const {
+    std::stringstream ss;
 
+    if (level == leaf_level()) {
+      generateGraphVizLeaf(file, node->as_leaf(), id);
+    } else {
+      ss.str("");
+      ss << "N" <<node << " [label = \"";
+
+      for (const auto& child : *node) {
+        ss << "<E"<< child.second <<">|R" << id++ <<"|";
+        file << "N" <<  node << ":E" << child.second << " -> " << "N"<< child.second <<";" << std::endl;
+        generateGraphVizNode(file, child.second->as_node(), level + 1, id);
+      }
+      ss << "\"];\n";
+      file << ss.str();
+    }
+  }
+
+  void generateGraphVizLeaf(std::ofstream& file, const leaf_type* leaf, int& id) const {
+    std::stringstream ss;
+    ss << "N" << leaf << " [label = \"";
+    for (const auto& child : *leaf) {
+      ss << "R" << id++ << "|";
+    }
+    ss << "\"];\n";
+    file << ss.str();
+  }
   /*
   ReInsertion Scheme
   When node overflow occurs

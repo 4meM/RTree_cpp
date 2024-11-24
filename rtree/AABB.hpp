@@ -110,10 +110,10 @@ namespace rtree {
     // check if a bounding box is overlapping with another bounding box
     template <typename PointType>
     static bool is_overlap(AABB const& aabb, aabb_t<PointType> const& aabb2) {
-      if (!less_than(aabb2.min_, aabb.max_)) {
+      if (!less_equal(aabb2.min_, aabb.max_)) {
         return false;
       }
-      if (!less_than(aabb.min_, aabb2.max_)) {
+      if (!less_equal(aabb.min_, aabb2.max_)) {
         return false;
       }
       return true;
