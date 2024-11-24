@@ -83,6 +83,19 @@ namespace rtree {
 		scalar_type const* end() const {
 			return _data + size();
 		}
+
+		friend std::ostream& operator<<(std::ostream& os, const point_t& point) {
+			os << "(";
+			for (size_type i = 0; i < Dim; ++i) {
+				os << point._data[i];
+				if (i < Dim - 1) {
+					os << ", ";
+				}
+			}
+			os << ")";
+			return os;
+		}
+
 	};
 
 }

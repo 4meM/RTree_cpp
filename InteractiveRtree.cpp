@@ -18,6 +18,10 @@ void InteractiveRtree::displayObjects(std::vector<std::list<object_type>::iterat
 InteractiveRtree::InteractiveRtree(){
 	window.create(sf::VideoMode(1280, 720), "Interactive Rtree");
 	window.setFramerateLimit(60);
+	if (!font.loadFromFile("../font/fresco_stamp/FrescoStamp.ttf")) {
+		std::cerr << "Error loading font\n";
+		return;
+	}
 }
 
 InteractiveRtree::~InteractiveRtree() = default;
@@ -27,7 +31,6 @@ void InteractiveRtree::run() {
 	bool isDrawing = false;
 	float searchRangeLenght = 0.0f;
 	std::vector<std::list<object_type>::iterator> windowQueryResult;
-
 	while (window.isOpen()) {
 		point_type searchRangeMin = {window.mapPixelToCoords(sf::Mouse::getPosition(window)).x - searchRangeLenght,
 								 window.mapPixelToCoords(sf::Mouse::getPosition(window)).y - searchRangeLenght};
@@ -90,10 +93,18 @@ void InteractiveRtree::run() {
 					}
 				}
 			}
+			else if(event.type == sf::Event::KeyPressed) {
+				if(event.key.code == sf::Keyboard::Space) {
+					rtree.generate_dot("rtree_structure.dot");
+					system("dot -Tpng rtree_structure.dot -o rtree_structure.png");
+					system("start rtree_structure.png");
+				}
+			}
 		}
+		int id = 0;
 		window.clear(sf::Color::White);
 		displayObjects(windowQueryResult);
-		displayRtreeAABBs(rtree.root()->as_node(), 0);
+		displayRtreeAABBs(rtree.root()->as_node(), 0,id);
 		if(isDrawing) {
 			sf::Vector2f currentPoint = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 			sf::VertexArray line(sf::LinesStrip, 2);
@@ -111,7 +122,6 @@ void InteractiveRtree::run() {
 		searchRect.setOutlineThickness(2);
 		window.draw(searchRect);
 		window.display();
-
 		windowQueryResult.clear();
 	}
 }
