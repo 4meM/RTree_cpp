@@ -35,7 +35,7 @@ class InteractiveRtree {
             text.setFont(font);
             text.setString("R" + std::to_string(id++));
             text.setCharacterSize(24);
-            text.setFillColor(sf::Color::Yellow);
+            text.setFillColor(sf::Color(57, 255, 20));
             text.setPosition(aabb.min_[0], aabb.min_[1]);
             window.draw(text);
             if(level != rtree.leaf_level()) {
