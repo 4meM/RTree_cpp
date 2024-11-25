@@ -112,7 +112,8 @@ protected:
       ss << "N" <<node << " [label = \"";
 
       for (const auto& child : *node) {
-        ss << "<E"<< child.second <<">|R" << id++ <<"|";
+        ss << "<E"<< child.second <<">|R" << id++ <<":("<<child.first.min_[0]<<", "<<child.first.min_[1]<<
+              ", "<<child.first.max_[0]<<", "<<child.first.max_[1]<<")"<<"|";
         file << "N" <<  node << ":E" << child.second << " -> " << "N"<< child.second <<";" << std::endl;
         generateGraphVizNode(file, child.second->as_node(), level + 1, id);
       }
@@ -125,7 +126,8 @@ protected:
     std::stringstream ss;
     ss << "N" << leaf << " [label = \"";
     for (const auto& child : *leaf) {
-      ss << "R" << id++ << "|";
+      ss << "R" << id++ <<": ("<<child.first.min_[0]<<", "<<child.first.min_[1]<<
+            ", "<<child.first.max_[0]<<", "<<child.first.max_[1]<<")"<<"|";
     }
     ss << "\"];\n";
     file << ss.str();
@@ -247,49 +249,16 @@ protected:
     }
   }
 
-  /*
-    Overflow treatment:
-      either split or reinsert
-  */
-
-  /*
-    splitting scheme:
-      quadratic split
-      r*-tree split
-  */
-
-  // 'node' contains MAX_ENTRIES nodes;
-  // trying to add additional child 'child'
-  // split into two nodes
-  // so that two nodes' child count is in range [ MIN_ENTRIES, MAX_ENTRIES ]
   template <typename NodeType>
   NodeType* split(NodeType* node, typename NodeType::value_type child) {
     NodeType* pair = construct_node<NodeType>();
-    // @TODO another split scheme
     splitter_t spliter;
     spliter(node, std::move(child), pair);
     return pair;
   }
 
-  // 'node' contains MAX_ENTRIES nodes;
-  // trying to add additional child 'child'
-  // pick `reinsert_nodes` children from node and reinsert them
   void reinsert(node_type* node, typename node_type::value_type child)
   {
-    /*
-    Algorithm Reinsert
-      1. For all M+l entries of a node N, compute the distance
-          between the centers of their rectangles and the center
-          of the bounding rectangle of N
-      2. Sort the entries m decreasing order of their distances
-          computed in (1)
-      3. Remove the first p entries from N and adjust the
-          bounding rectangle of N
-      4. In the sort, defined in (2), starting with the maximum distance
-         (= far reinsert) or minimum distance (= close reinsert),
-         invoke Insert to reinsert the entries
-    */
-
     const int node_realtive_level_from_leaf
         = leaf_level() - node->level_recursive();
     const size_type reinsert_count = _reinsert_nodes;
